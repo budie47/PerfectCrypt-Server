@@ -27,6 +27,10 @@ import modal.User;
 
 public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public String name;
 
 	public StartServerCtrl() throws RemoteException{
@@ -65,6 +69,8 @@ public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 		Registration register = new Registration();
 		try {
 			int result = register.registerUser(user);
+			File userFolder = new File("file/"+user.getUsername());
+			userFolder.mkdirs();
 			if(result == 0){
 				state = false;
 			} else{

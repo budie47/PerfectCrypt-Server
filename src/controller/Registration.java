@@ -9,8 +9,8 @@ import modal.User;
 public class Registration {
 	public int registerUser(User user)throws Exception{
 		int state = 0;
-		String sqlSyntax = "INSERT INTO user (username, password, full_name, ic, phone_no, email, address, public_key)"
-				+ " VALUES (?, ?, ?,?, ?, ?, ?,?)";
+		String sqlSyntax = "INSERT INTO user (username, password, full_name, ic, phone_no, email, address, public_key,type)"
+				+ " VALUES (?, ?, ?,?, ?, ?, ?,?,?)";
 		Connection conn = new DbConn().getConnection();
 		PreparedStatement ps = conn.prepareStatement(sqlSyntax);
 		ps.setString(1, user.getUsername());
@@ -21,6 +21,7 @@ public class Registration {
 		ps.setString(6, user.getEmail());
 		ps.setString(7, user.getAddress1()+","+user.getAddress2()+","+user.getAddress3());
 		ps.setString(8, user.getPublicKey());
+		ps.setString(9, user.getType());
 		state = ps.executeUpdate();
 		ps.close();conn.close();
 		return state;

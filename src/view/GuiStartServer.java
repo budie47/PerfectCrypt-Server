@@ -30,7 +30,7 @@ import java.io.*;
 
 public class GuiStartServer {
 
-	private JFrame frame;
+	public JFrame frame;
 	public JTextArea serverTextArea;
 	Registry reg,rmiRegistry;
 	StaticRI objServer ;
@@ -70,7 +70,7 @@ public class GuiStartServer {
 //		System.setProperty("hostname", "192.168.0.157");
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel("Perfect Crypt Server");
@@ -110,6 +110,7 @@ public class GuiStartServer {
 					stop();
 					btnStartServer.setEnabled(true);
 					btnStopServer.setEnabled(false);
+					frame.dispose();
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

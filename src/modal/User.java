@@ -15,7 +15,35 @@ public class User implements Serializable {
 	private String address2;
 	private String address3;
 	private String publicKey;
+	private String encryptedPrivateKey;
+	public String getEncryptedPrivateKey() {
+		return encryptedPrivateKey;
+	}
+
+	public void setEncryptedPrivateKey(String encryptedPrivateKey) {
+		this.encryptedPrivateKey = encryptedPrivateKey;
+	}
+
+	private String type;
+	private String MAC;
 	
+	
+	public String getMAC() {
+		return MAC;
+	}
+
+	public void setMAC(String mAC) {
+		MAC = mAC;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
 	public User(){
 		super();
 	}

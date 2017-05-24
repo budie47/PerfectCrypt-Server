@@ -9,7 +9,7 @@ import java.awt.GridBagLayout;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 
-
+import controller.LoginUser;
 import controller.StaticRI;
 import modal.User;
 
@@ -116,6 +116,34 @@ public class GuiLogin {
 		JButton btnNewButton = new JButton("Log In");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				User user = new User();
+				LoginUser lg = new LoginUser();
+
+				String stringPass = null;
+				
+				char[] pass = tPassword.getPassword();
+				
+				for (int i = 0;i < pass.length; i++){			
+					stringPass += Character.toString(pass[i]);
+				}
+				user.setUsername(tUsername.getText());
+				user.setPassword(stringPass); 
+				try{
+					int result  = lg.loginAdmin(user);
+					if(result == 1){
+						GUIAdminDashboard adminDash = new GUIAdminDashboard();
+						adminDash.frame.setVisible(true);
+						adminDash.setAdmUserName(user.getUsername());
+						adminDash.lblAdmUsername.setText(adminDash.getAdmUserName());
+						frame.dispose();
+						//JOptionPane.showMessageDialog(null,"Login success", "Login", JOptionPane.WARNING_MESSAGE);
+					}else{
+						
+					}
+				}catch(Exception err){
+					JOptionPane.showMessageDialog(null,err, "Connection with Server Error :", JOptionPane.WARNING_MESSAGE);
+				}
+				
 
 			}
 		});

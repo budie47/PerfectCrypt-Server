@@ -10,20 +10,24 @@ import java.awt.Font;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JTextPane;
+
+import modal.User;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class GUIUser {
 
-	private JFrame frame;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
-	private JTextField textField_4;
-	private JTextField textField_5;
-	private JTextField textField_6;
-	private JTextField textField_8;
-	private JTextField textField_9;
-	private JTextField textField_10;
+	public JFrame frame;
+	private JTextField tUsername;
+	private JTextField tPassword;
+	private JTextField tCPassword;
+	private JTextField FullName;
+	private JTextField tIC;
+	private JTextField tPhoneNo;
+	private JTextField tEmail;
 
 	/**
 	 * Launch the application.
@@ -54,13 +58,13 @@ public class GUIUser {
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 488, 643);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBackground(Color.LIGHT_GRAY);
-		panel.setBounds(0, 0, 676, 70);
+		panel.setBounds(0, 0, 472, 70);
 		frame.getContentPane().add(panel);
 		
 		JLabel label = new JLabel("Username :");
@@ -126,74 +130,85 @@ public class GUIUser {
 		
 		JLabel lblAddress = new JLabel("Address");
 		lblAddress.setFont(new Font("Candara", Font.PLAIN, 14));
-		lblAddress.setBounds(10, 332, 128, 27);
+		lblAddress.setBounds(10, 361, 128, 27);
 		panel_1.add(lblAddress);
 		
-		textField = new JTextField();
-		textField.setBounds(162, 21, 269, 27);
-		panel_1.add(textField);
-		textField.setColumns(10);
+		tUsername = new JTextField();
+		tUsername.setBounds(162, 21, 269, 27);
+		panel_1.add(tUsername);
+		tUsername.setColumns(10);
 		
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(162, 62, 269, 27);
-		panel_1.add(textField_1);
+		tPassword = new JTextField();
+		tPassword.setColumns(10);
+		tPassword.setBounds(162, 62, 269, 27);
+		panel_1.add(tPassword);
 		
-		textField_2 = new JTextField();
-		textField_2.setColumns(10);
-		textField_2.setBounds(162, 100, 269, 27);
-		panel_1.add(textField_2);
+		tCPassword = new JTextField();
+		tCPassword.setColumns(10);
+		tCPassword.setBounds(162, 100, 269, 27);
+		panel_1.add(tCPassword);
 		
-		textField_3 = new JTextField();
-		textField_3.setColumns(10);
-		textField_3.setBounds(162, 137, 269, 27);
-		panel_1.add(textField_3);
+		FullName = new JTextField();
+		FullName.setColumns(10);
+		FullName.setBounds(162, 137, 269, 27);
+		panel_1.add(FullName);
 		
-		textField_4 = new JTextField();
-		textField_4.setColumns(10);
-		textField_4.setBounds(162, 175, 269, 27);
-		panel_1.add(textField_4);
+		tIC = new JTextField();
+		tIC.setColumns(10);
+		tIC.setBounds(162, 175, 269, 27);
+		panel_1.add(tIC);
 		
-		textField_5 = new JTextField();
-		textField_5.setColumns(10);
-		textField_5.setBounds(162, 217, 269, 27);
-		panel_1.add(textField_5);
+		tPhoneNo = new JTextField();
+		tPhoneNo.setColumns(10);
+		tPhoneNo.setBounds(162, 217, 269, 27);
+		panel_1.add(tPhoneNo);
 		
-		textField_6 = new JTextField();
-		textField_6.setColumns(10);
-		textField_6.setBounds(162, 255, 269, 27);
-		panel_1.add(textField_6);
-		
-		textField_8 = new JTextField();
-		textField_8.setColumns(10);
-		textField_8.setBounds(162, 331, 269, 27);
-		panel_1.add(textField_8);
-		
-		textField_9 = new JTextField();
-		textField_9.setColumns(10);
-		textField_9.setBounds(162, 369, 269, 27);
-		panel_1.add(textField_9);
-		
-		textField_10 = new JTextField();
-		textField_10.setColumns(10);
-		textField_10.setBounds(162, 407, 269, 27);
-		panel_1.add(textField_10);
+		tEmail = new JTextField();
+		tEmail.setColumns(10);
+		tEmail.setBounds(162, 255, 269, 27);
+		panel_1.add(tEmail);
 		
 		JLabel lblBranch = new JLabel("Branch");
 		lblBranch.setFont(new Font("Candara", Font.PLAIN, 14));
 		lblBranch.setBounds(10, 291, 128, 27);
 		panel_1.add(lblBranch);
 		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setBounds(162, 293, 269, 27);
-		panel_1.add(comboBox);
+		JComboBox tBranchName = new JComboBox();
+		tBranchName.setBounds(162, 293, 269, 27);
+		panel_1.add(tBranchName);
+		
+		JComboBox tType = new JComboBox();
+		tType.setModel(new DefaultComboBoxModel(new String[] {"STAFF", "SYSTEM_ADMINISTRATOR"}));
+		tType.setBounds(162, 331, 269, 27);
+		panel_1.add(tType);
+		
+		JLabel Type = new JLabel("Type");
+		Type.setFont(new Font("Candara", Font.PLAIN, 14));
+		Type.setBounds(10, 329, 128, 27);
+		panel_1.add(Type);
+		
+		JTextPane textPane = new JTextPane();
+		textPane.setBounds(162, 368, 269, 87);
+		panel_1.add(textPane);
 		
 		JButton btnNewButton = new JButton("Add User");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				User user = new User();
+			}
+		});
 		btnNewButton.setFont(new Font("Candara", Font.BOLD, 18));
 		btnNewButton.setBounds(10, 557, 215, 36);
 		frame.getContentPane().add(btnNewButton);
 		
 		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				GUIManageUser gmu = new GUIManageUser();
+				gmu.frame.setVisible(true);
+				frame.dispose();
+			}
+		});
 		btnCancel.setFont(new Font("Candara", Font.BOLD, 18));
 		btnCancel.setBounds(247, 557, 215, 36);
 		frame.getContentPane().add(btnCancel);
