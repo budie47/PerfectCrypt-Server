@@ -1,5 +1,6 @@
 package controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -10,7 +11,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import com.hazelcast.util.Base64;
 
@@ -21,7 +24,7 @@ public class UserController {
 	
 	public Vector<User> retieveUser() throws Exception{
 		Vector<User> users = new Vector<User>();
-		String sql = "SELECT username,full_name,ic,phone_no,email,type FROM user";
+		String sql = "SELECT username,full_name,ic_new,phone_no,email,type FROM pc_adm_users";
 		Connection conn = new DbConn().getConnection();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ResultSet rs = ps.executeQuery();
@@ -57,29 +60,67 @@ public class UserController {
 		ps.setString(8, user.getPublicKey());
 		state = ps.executeUpdate();
 		ps.close();conn.close();
+		File userFolder = new File("file/"+user.getUsername());
+		userFolder.mkdirs();
 		return state;
 	}
+	public int registerUserAdm(User user)throws Exception{
+		int state = 0;
+		String sqlSyntax = "INSERT INTO `pc_adm_users`( `username`, `password`, `full_name`, "
+				+ "`ic_new`, `phone_no`, `email`, `address`, "
+				+ "`public_key`, `e_private_key`,  `type`,"
+				+ " `branch_id`) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+		Connection conn = new DbConn().getConnection();
+		PreparedStatement ps = conn.prepareStatement(sqlSyntax);
+		ps.setString(1, user.getUsername());
+		ps.setString(2, user.getPassword());
+		ps.setString(3, user.getFname());
+		ps.setString(4, user.getIcNo());
+		ps.setString(5, user.getPhoneNo());
+		ps.setString(6, user.getEmail());
+		ps.setString(7, user.getAddress1());
+		ps.setString(8, user.getPublicKey());
+		ps.setString(9, user.getEncryptedPrivateKey());
+		ps.setString(10, user.getType());
+		ps.setInt(11, user.getBranchId());
+		state = ps.executeUpdate();
+		ps.close();conn.close();
+		return state;
+	}
+	
+	public String getEncryptedPrivateKey(int userId)throws Exception{
+		String encryptedPrivateKey = null;
+		String sql = "SELECT `e_private_key` FROM `pc_adm_users` WHERE user_id = ?";
+		Connection conn = new DbConn().getConnection();
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setInt(1, userId);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()){
+			encryptedPrivateKey = rs.getString(1);
+		}
+		return encryptedPrivateKey;
+	}
+	
 	
 	public ArrayList generateKey(String password){
 		//boolean state = false;
 		GenerateKeys gk;
 		ArrayList keyPair = new ArrayList();
 		try {
-			gk = new GenerateKeys(1024);
+			gk = new GenerateKeys(2048);
 			gk.createKeys();
-			//gk.writeToFile("key/"+user.getUsername()+"/KeyPair/publicKey", gk.getPublicKey().getEncoded());
-			//gk.writeToFile("key/"+user.getUsername()+"/KeyPair/privateKey", gk.getPrivateKey().getEncoded());
-			//publicKey = gk.getPublicKey().toString();	
-			
+
 			String publicKey = gk.getStringPublicKey(gk.getPublicKey());
 			String privateKey = gk.getStringPrivateKey(gk.getPrivateKey());
 
+			String encryptedPrivateKey = encryptPrivateKey(privateKey,password);
+			//String decryptedPrivateKey = decryptPrivateKey(encryptedPrivateKey, password);
+			
+			keyPair.add(publicKey);
+			keyPair.add(encryptedPrivateKey);
 
 			
-			String encryptedPrivateKey = encryptPrivateKey(privateKey,password);
-			keyPair.add(publicKey);
-			keyPair.add(privateKey);
-			keyPair.add(encryptedPrivateKey);
 			 
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
@@ -100,9 +141,9 @@ public class UserController {
 	        byte[] raw = skey.getEncoded();
 	        strKey = new String(Base64.encode(raw));
 			//encryptedPrivateKey = aes.encrypt(strKey,strIv, privateKey);
-	        encryptedPrivateKeybyte = aes.encryptAES256(strKey, strIv, privateByte);
+	        encryptedPrivateKey = aes.encrypt(strKey, strIv, privateKey);
 			
-			System.out.println("STRKey : " + strKey);
+			//System.out.println("STRKey : " + strKey);
 
 		return encryptedPrivateKey;
 	}
@@ -118,11 +159,30 @@ public class UserController {
 			skey = aes.generateAESPasswordKey(Password,strIv);
 	        byte[] raw = skey.getEncoded();
 	        strKey = new String(Base64.encode(raw));
-	        System.out.println("STRKey : " +strKey);
+	        //System.out.println("STRKey : " +strKey);
 	        decryptPrivateKey = aes.decrypt(strKey,strIv, encryptedKey.trim());
 
 		return decryptPrivateKey;
 	}
+	
+	public static String encryptBlowfish(String to_encrypt, String strkey) {
+		  try {
+		    SecretKeySpec key = new SecretKeySpec(strkey.getBytes(), "Blowfish");
+		     Cipher cipher = Cipher.getInstance("Blowfish");
+		     cipher.init(Cipher.ENCRYPT_MODE, key);
+		     return new String(cipher.doFinal(to_encrypt.getBytes()));
+		  } catch (Exception e) { return null; }
+		}
+
+		public static String decryptBlowfish(String to_decrypt, String strkey) {
+		  try {
+		     SecretKeySpec key = new SecretKeySpec(strkey.getBytes(), "Blowfish");
+		     Cipher cipher = Cipher.getInstance("Blowfish");
+		     cipher.init(Cipher.DECRYPT_MODE, key);
+		     byte[] decrypted = cipher.doFinal(to_decrypt.getBytes());
+		     return new String(decrypted);
+		  } catch (Exception e) { return null; }
+		}
 	
 	public static void main(String[] args) {
 		
@@ -130,20 +190,27 @@ public class UserController {
 		String privateKey;
 		String decryptPrivateKey = null;
 		UserController uc = new UserController();
-		ArrayList keyPair = uc.generateKey("Pass");
+		ArrayList keyPair = uc.generateKey("abc123");
 		String encryptedKey = keyPair.get(1).toString();
 		try {
-			decryptPrivateKey = uc.decryptPrivateKey(encryptedKey,"Pass");
+			decryptPrivateKey = uc.decryptPrivateKey(encryptedKey,"abc123");
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		System.out.println(keyPair.get(0));
+		System.out.println("private key" + keyPair.get(0));
+		System.out.println("decrypted key" + decryptPrivateKey);
 		System.out.println(keyPair.get(1));
-		System.out.println(encryptedKey);
-		System.out.println(decryptPrivateKey);
 		
+
+		
+		if(keyPair.get(0).equals(decryptPrivateKey)){
+			System.out.println("same.....");
+		}else{
+			System.out.println("not same.....");
+		}
 
 
 	}

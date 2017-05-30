@@ -44,5 +44,19 @@ public class BranchController {
 		rs.close();ps.close();conn.close();
 		return branches;
 	} 
+	
+	public int getBranchId(String branchName)throws Exception{
+		int branchId = 0;
+		String sql = "SELECT branch_id FROM `branch` WHERE branch_name LIKE ?";
+		Connection conn = new DbConn().getConnection();
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, "'%"+branchName+"%'");
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()){
+			branchId = rs.getInt(1);
+		}
+		
+		return branchId;
+	}
 
 }

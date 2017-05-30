@@ -90,7 +90,7 @@ public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 		
 		try {
 			Connection conn = new DbConn().getConnection();
-			sql = "SELECT username, full_name FROM `user` WHERE username LIKE ?";
+			sql = "SELECT username, full_name FROM pc_adm_users WHERE username LIKE ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, "%"+name+"%");
 			rs = ps.executeQuery();
@@ -189,7 +189,7 @@ public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 		ResultSet rs;
 		try {
 			Connection conn = new DbConn().getConnection();
-			String sql = "SELECT public_key FROM `user` WHERE username = ?";
+			String sql = "SELECT public_key FROM pc_adm_users WHERE username = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, userName);
 			rs = ps.executeQuery();
@@ -207,15 +207,15 @@ public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 		return publicKey;
 	}
 	@Override
-	public void saveData(String method, String receiveName, String receiverPath) {
+	public void saveData(String method, String receiveName, String receiverPath,String digitalSignture) {
 		// TODO Auto-generated method stub
 		int state = 0;
-		System.out.println(method);
-		System.out.println(receiveName);
-		System.out.println(receiverPath);
+//		System.out.println(method);
+//		System.out.println(receiveName);
+//		System.out.println(receiverPath);
 		DataController sd = new DataController();
 		try {
-			state = sd.saveData(method, receiveName, receiverPath);
+			state = sd.saveData(method, receiveName, receiverPath,digitalSignture);
 			if(state == 0){
 				System.out.println("data NOT inserted");
 			}else{
@@ -308,6 +308,25 @@ public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 		}
 		
 		return method;
+	}
+
+	public String getUserEncryptedPrivateKey(String username) throws RemoteException {
+		// TODO Auto-generated method stub
+		UserController uc = new UserController();
+		AddFriend ad = new AddFriend();
+		
+		
+		String encryptedPrivatekey = null;
+		try {
+			 String userId = ad.getUserId(username);
+			encryptedPrivatekey = uc.getEncryptedPrivateKey(Integer.parseInt(userId));
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return encryptedPrivatekey;
 	}
 
 

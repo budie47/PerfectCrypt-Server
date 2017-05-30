@@ -45,15 +45,18 @@ public static void copy(InputStream in, OutputStream out)
         long t;
         
         t = System.currentTimeMillis();
+        t = System.currentTimeMillis();
+        
+        
         download(server, testFile, new File("picDownload.jpg"));
+        upload(server, new File("C:Users\\-D-\\Desktop\\pic.jpg"),new File("pic.jpg"));
         
 //        t = (System.currentTimeMillis() - t) / 1000;
 //        System.out.println("download: " + (len / t / 1000000d) + 
 //            " MB/s");
 //        System.out.println("2" );
         
-        t = System.currentTimeMillis();
-        upload(server, new File("C:Users\\-D-\\Desktop\\pic.jpg"),new File("pic.jpg"));
+
         
 //        System.out.println("3");
 //        t = (System.currentTimeMillis() - t) / 1000;

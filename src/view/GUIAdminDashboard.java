@@ -80,6 +80,11 @@ public class GUIAdminDashboard {
 		panel.add(label_1);
 		
 		JButton button = new JButton("Log Out");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.dispose();
+			}
+		});
 		button.setBounds(371, 4, 90, 28);
 		panel.add(button);
 		

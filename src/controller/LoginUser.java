@@ -37,7 +37,7 @@ public int loginUser(User user) throws Exception{
 	String pass = null;
 	HashPassword hash = new HashPassword();
 	
-	String sqlSyntax = "SELECT password FROM user WHERE username = ?";
+	String sqlSyntax = "SELECT password FROM pc_adm_users WHERE username = ?";
 	Connection conn = new DbConn().getConnection();
 	
 	PreparedStatement ps =  conn.prepareStatement(sqlSyntax);

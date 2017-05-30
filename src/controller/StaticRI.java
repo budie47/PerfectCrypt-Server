@@ -25,10 +25,12 @@ public interface StaticRI extends Remote {
 	public void openServer(String userFile,String rmiAdd) throws RemoteException;
 	public void checkPath(String pathFile) throws RemoteException;
 	public String getPublicKey(String userName) throws RemoteException;
-	public void saveData(String method, String receiveName, String receiverPath)throws RemoteException;
+	public void saveData(String method, String receiveName, String receiverPath, String digitalSignture)throws RemoteException;
 	public Vector<FileUser>getFileUser(String user)throws RemoteException, Exception;
 	public String getFileNamePath(String fileName, String username) throws RemoteException;
 	public String getMethodCrypto(String filePath,String username) throws RemoteException;
+	
+	public String getUserEncryptedPrivateKey(String userId)throws RemoteException;
 
 
 }

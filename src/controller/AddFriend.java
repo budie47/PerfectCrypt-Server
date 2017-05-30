@@ -38,7 +38,7 @@ public class AddFriend {
 	
 	public String getUserId(String user){
 		String Id = null;
-		String sqlSyntax = "SELECT user_id FROM user WHERE username = ?";
+		String sqlSyntax = "SELECT user_id FROM pc_adm_users WHERE username = ?";
 		ResultSet rs;
 		try{
 			Connection conn = new DbConn().getConnection();
@@ -65,7 +65,7 @@ public class AddFriend {
 	public Vector<User> getCurrentFriend(String name){
 		Vector<User> friends = new Vector<User>();
 		String idUser = getUserId(name);
-		String sqlSyntax = "SELECT user.username,user.full_name FROM user_friends INNER JOIN user ON user_friends.friend_id = user.user_id WHERE user_friends.user_id = ?";
+		String sqlSyntax = "SELECT pc_adm_users.username,pc_adm_users.full_name FROM user_friends INNER JOIN pc_adm_users ON user_friends.friend_id = pc_adm_users.user_id WHERE user_friends.user_id = ?";
 		ResultSet rs ;
 		try {
 			Connection conn = new DbConn().getConnection();
