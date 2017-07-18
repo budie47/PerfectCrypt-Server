@@ -206,8 +206,31 @@ public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 		
 		return publicKey;
 	}
+	
+	public String getSenderPublicKey(int user_id) throws RemoteException{
+		String publicKey = "";
+		ResultSet rs;
+		try {
+			Connection conn = new DbConn().getConnection();
+			String sql = "SELECT public_key FROM pc_adm_users WHERE user_id = ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, user_id);
+			rs = ps.executeQuery();
+			while(rs.next()){
+				publicKey = rs.getString(1);
+			}
+			System.out.println(publicKey);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return publicKey;
+	}
 	@Override
-	public void saveData(String method, String receiveName, String receiverPath,String digitalSignture) {
+	public void saveData(String method, String receiveName, String receiverPath,String digitalSignture,String sender) {
 		// TODO Auto-generated method stub
 		int state = 0;
 //		System.out.println(method);
@@ -215,7 +238,7 @@ public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 //		System.out.println(receiverPath);
 		DataController sd = new DataController();
 		try {
-			state = sd.saveData(method, receiveName, receiverPath,digitalSignture);
+			state = sd.saveData(method, receiveName, receiverPath,digitalSignture,sender);
 			if(state == 0){
 				System.out.println("data NOT inserted");
 			}else{
@@ -235,30 +258,32 @@ public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 		DataController dc = new DataController();
 		String user_id = af.getUserId(user);
 		int id =  Integer.parseInt(user_id);
-		System.out.println(user_id);
+		//System.out.println(user_id);
 		Vector<FileUser> dataUser = new Vector<FileUser>();
 		String sqlSyntax = "SELECT method, path FROM data_info WHERE user_id = ?";
 		ResultSet rs;
 		Connection conn = new DbConn().getConnection();
 		PreparedStatement ps = conn.prepareStatement(sqlSyntax);
 		ps.setInt(1,id);
-		System.out.println(id);
+		//System.out.println(id);
 		rs = ps.executeQuery();
-		System.out.println(rs.getFetchSize());
-		System.out.println(rs);
+		//System.out.println(rs.getFetchSize());
+		//System.out.println(rs);
 		while(rs.next()){
 			FileUser fu = new FileUser();
 			String filePath = rs.getString(2);
 			String[] fileNameArry = filePath.split("/");
-			System.out.println(filePath);
+			//System.out.println(filePath);
 			fu.setMethod(rs.getString(1));
 			fu.setFilePath(fileNameArry[3]);
 			dataUser.addElement(fu);
 		}
 		return dataUser;
-		
-			
+
 	}
+	
+	
+	
 	@Override
 	public String getFileNamePath(String fileName, String username) throws RemoteException {
 		// TODO Auto-generated method stub
@@ -308,6 +333,61 @@ public class StartServerCtrl extends UnicastRemoteObject implements StaticRI
 		}
 		
 		return method;
+	}
+	
+	public String getDigitalSignature(String filePath,String username) throws RemoteException {
+		// TODO Auto-generated method stub
+		String digitalSignature = null;
+		ResultSet rs;
+		try{
+			AddFriend ad = new AddFriend();
+			String user_id = ad.getUserId(username);
+			Connection conn = new DbConn().getConnection();
+			String sql = "SELECT digital_signature FROM data_info WHERE user_id = ? AND path LIKE ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, Integer.parseInt(user_id));
+			ps.setString(2,"%"+filePath+"%");
+			rs = ps.executeQuery();
+			while(rs.next()){
+				digitalSignature = rs.getString(1);
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return digitalSignature;
+	}
+	
+	public String getSenderPublicKey(String filePath,String username) throws RemoteException {
+		// TODO Auto-generated method stub
+		String senderPK = null;
+		String sender_id= "0";
+		ResultSet rs;
+		try{
+			AddFriend ad = new AddFriend();
+			String user_id = ad.getUserId(username);
+			Connection conn = new DbConn().getConnection();
+			String sql = "SELECT sender_id FROM data_info WHERE user_id = ? AND path LIKE ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, Integer.parseInt(user_id));
+			ps.setString(2,"%"+filePath+"%");
+			rs = ps.executeQuery();
+			while(rs.next()){
+				sender_id = rs.getString(1);
+			}
+			System.out.println(sender_id);
+			System.out.println(sql);
+			System.out.println(filePath);
+			System.out.println(username);
+			senderPK = getSenderPublicKey(Integer.parseInt(sender_id));
+			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return senderPK;
 	}
 
 	public String getUserEncryptedPrivateKey(String username) throws RemoteException {

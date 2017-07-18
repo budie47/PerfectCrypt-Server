@@ -13,17 +13,20 @@ public class DataController {
 	public DataController(){
 		super();
 	}
-	public int saveData(String method,String user, String path, String digitalSignture) throws Exception{
+	public int saveData(String method,String user, String path, String digitalSignture, String sender) throws Exception{
 		int state = 0;
 		AddFriend ad = new AddFriend();
 		String user_id = ad.getUserId(user);
-		String sqlSyntax = "INSERT INTO `data_info`(`method`, `path`, `user_id`,`digital_signature`) VALUES (?,?,?,?)";
+		String sender_id = ad.getUserId(sender);
+		String sqlSyntax = "INSERT INTO `data_info`(`method`, `path`, `user_id`,`digital_signature`,`sender_id`) VALUES (?,?,?,?,?)";
 		Connection conn = new DbConn().getConnection();
 		PreparedStatement ps = conn.prepareStatement(sqlSyntax);
 		ps.setString(1, method);
 		ps.setString(2, path);
 		ps.setString(3, user_id);
 		ps.setString(4, digitalSignture);
+		ps.setString(5, sender_id);
+		
 		state = ps.executeUpdate();
 		ps.close();
 		return state;

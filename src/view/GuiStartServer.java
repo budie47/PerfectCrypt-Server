@@ -124,6 +124,7 @@ public class GuiStartServer {
 	
     public void startServer() throws Exception {
     	objServer = new StartServerCtrl();
+    	System.setProperty("hostname", "192.168.43.100");
     	reg = LocateRegistry.createRegistry(1099);
     	reg.bind("PerfectCrypt", objServer);
         System.out.println("Server started");
