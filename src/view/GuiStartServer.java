@@ -38,6 +38,8 @@ public class GuiStartServer {
 	JButton btnStartServer;
 	JButton btnStopServer;
 	
+	private static final String SERVER_IP_ADDRESS =  "192.168.0.186";
+	
 	
 
 	/**
@@ -67,7 +69,7 @@ public class GuiStartServer {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-//		System.setProperty("hostname", "192.168.0.157");
+		System.setProperty("hostname",SERVER_IP_ADDRESS);
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -124,7 +126,6 @@ public class GuiStartServer {
 	
     public void startServer() throws Exception {
     	objServer = new StartServerCtrl();
-    	System.setProperty("hostname", "192.168.43.100");
     	reg = LocateRegistry.createRegistry(1099);
     	reg.bind("PerfectCrypt", objServer);
         System.out.println("Server started");

@@ -38,9 +38,11 @@ public int loginUser(User user) throws Exception{
 	HashPassword hash = new HashPassword();
 	
 	String sqlSyntax = "SELECT password FROM pc_adm_users WHERE username = ?";
+	String updateSyntax = "UPDATE pc_adm_users SET status = '1'  WHERE username = ?";
 	Connection conn = new DbConn().getConnection();
 	
 	PreparedStatement ps =  conn.prepareStatement(sqlSyntax);
+	PreparedStatement update = conn.prepareStatement(updateSyntax);
 	ps.setString(1, user.getUsername());
 
 	ResultSet rs = ps.executeQuery();
@@ -51,12 +53,16 @@ public int loginUser(User user) throws Exception{
 		boolean isTrue = hash.validatePassword(user.getPassword(), pass);
 		if(isTrue){
 			state = 1;
+			update.setString(1, user.getUsername());
+			update.executeUpdate();
 		}
 		//JOptionPane.showMessageDialog(null, isTrue, "Server Hello: ", JOptionPane.WARNING_MESSAGE);
 	}
 	//JOptionPane.showMessageDialog(null, state, "Server Hello: ", JOptionPane.WARNING_MESSAGE);
 	return state;
 }
+
+
 
 public int loginAdmin(User user) throws Exception{
 	int state = 0;

@@ -19,6 +19,25 @@ public class User implements Serializable {
 	private int branchId;
 	private String certificate;
 	
+	private String dhPublicKey;
+	private String dhPrivateKey;
+	
+	public String getDhPublicKey() {
+		return dhPublicKey;
+	}
+
+	public void setDhPublicKey(String dhPublicKey) {
+		this.dhPublicKey = dhPublicKey;
+	}
+
+	public String getDhPrivateKey() {
+		return dhPrivateKey;
+	}
+
+	public void setDhPrivateKey(String dhPrivateKey) {
+		this.dhPrivateKey = dhPrivateKey;
+	}
+
 	public int getBranchId() {
 		return branchId;
 	}

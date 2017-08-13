@@ -225,6 +225,8 @@ public class GUIUser {
 				String hashPass = null;
 				String publicKey = null;
 				String ePrivateKey = null;
+				String dhPublicKey = null;
+				String dhSecretKey = null;
 				
 				
 				char[] pass = tPassword.getPassword();
@@ -250,6 +252,8 @@ public class GUIUser {
 						keyPair = uc.generateKey(stringPass);
 						publicKey = (String) keyPair.get(0);
 						ePrivateKey = (String) keyPair.get(1);
+						dhPublicKey = (String) keyPair.get(2);
+						dhSecretKey = (String) keyPair.get(3);
 						branchId = bc.getBranchId(branchName);
 						
 						user.setUsername(username);
@@ -263,6 +267,8 @@ public class GUIUser {
 						user.setEncryptedPrivateKey(ePrivateKey);
 						user.setType(type);
 						user.setBranchId(branchId);
+						user.setDhPublicKey(dhPublicKey);
+						user.setDhPrivateKey(dhSecretKey);
 						
 						int result = uc.registerUserAdm(user);
 						if(result == 0){

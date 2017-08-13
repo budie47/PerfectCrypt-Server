@@ -2,6 +2,7 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
@@ -69,8 +70,8 @@ public class UserController {
 		String sqlSyntax = "INSERT INTO `pc_adm_users`( `username`, `password`, `full_name`, "
 				+ "`ic_new`, `phone_no`, `email`, `address`, "
 				+ "`public_key`, `e_private_key`,  `type`,"
-				+ " `branch_id`) "
-				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+				+ " `branch_id`,`dh_public_key`, `dh_e_secret_key`) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		Connection conn = new DbConn().getConnection();
 		PreparedStatement ps = conn.prepareStatement(sqlSyntax);
 		ps.setString(1, user.getUsername());
@@ -84,6 +85,8 @@ public class UserController {
 		ps.setString(9, user.getEncryptedPrivateKey());
 		ps.setString(10, user.getType());
 		ps.setInt(11, user.getBranchId());
+		ps.setString(12, user.getDhPublicKey());
+		ps.setString(13, user.getDhPrivateKey());
 		state = ps.executeUpdate();
 		ps.close();conn.close();
 		return state;
@@ -101,6 +104,47 @@ public class UserController {
 		}
 		return encryptedPrivateKey;
 	}
+	public ArrayList<String> getEncryptedPrivateKeyNew(int userId)throws Exception{
+		ArrayList<String> encryptedPrivateKey = new ArrayList<String>();
+		String sql = "SELECT `e_private_key`,`password` FROM `pc_adm_users` WHERE user_id = ?";
+		Connection conn = new DbConn().getConnection();
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setInt(1, userId);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()){
+			encryptedPrivateKey.add(rs.getString(1));
+			encryptedPrivateKey.add(rs.getString(2));
+		}
+		return encryptedPrivateKey;
+	}
+	
+	public ArrayList<String> getDHKey(int userId)throws Exception{
+		
+		String encryptedPrivateKey = null;
+		ArrayList<String> dhKey = new ArrayList<String>();
+		UserController uc = new UserController();
+		
+		 ArrayList<String> pkList = uc.getEncryptedPrivateKeyNew(userId);
+		
+		 String password = pkList.get(1);
+		 String decryptedPrivateKey ;
+		 String secondEncryption ;
+		
+		String sql = "SELECT `dh_public_key`, `dh_e_secret_key` FROM `pc_adm_users` WHERE user_id = ?";
+		Connection conn = new DbConn().getConnection();
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setInt(1, userId);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()){
+			dhKey.add(rs.getString(1));
+			decryptedPrivateKey = uc.decryptPrivateKeyNew(rs.getString(2), "-");
+			secondEncryption = uc.encryptPrivateKey(decryptedPrivateKey, password);
+			dhKey.add(secondEncryption);
+		}
+		
+		ps.close();conn.close();
+		return dhKey;
+	}
 	
 	
 	public ArrayList generateKey(String password){
@@ -113,12 +157,21 @@ public class UserController {
 
 			String publicKey = gk.getStringPublicKey(gk.getPublicKey());
 			String privateKey = gk.getStringPrivateKey(gk.getPrivateKey());
-
-			String encryptedPrivateKey = encryptPrivateKey(privateKey,password);
+			
+			DiffieHellman dh = new DiffieHellman();
+			String dhPublicKey = dh.getPublicKey().toString();
+			String dhSecretKey = dh.getSecretKey().toString();
+			
+			
+			String encryptedPrivateKey = encryptPrivateKeyNew(privateKey,password);
+			String encryptedDHSecretKey = encryptPrivateKeyNew(dhSecretKey,password);
 			//String decryptedPrivateKey = decryptPrivateKey(encryptedPrivateKey, password);
 			
 			keyPair.add(publicKey);
 			keyPair.add(encryptedPrivateKey);
+			keyPair.add(dhPublicKey);
+			keyPair.add(encryptedDHSecretKey);
+			keyPair.add(dhSecretKey);
 
 			
 			 
@@ -126,6 +179,30 @@ public class UserController {
 			System.err.println(e.getMessage());
 		} 
 		return keyPair;
+	}
+	
+	public String encryptPrivateKeyNew(String privateKey,String Password) throws Exception{
+		String encryptedPrivateKey = "";
+		byte[] encryptedPrivateKeybyte ;
+        String strIv = "18A5Z/IsHs6g8/65sBxkCQ==";
+        String strKey = "";
+        byte[] privateByte = privateKey.getBytes();
+        GenerateMasterKey GMK = new GenerateMasterKey();
+        
+        String masterkey = GMK.getMasterKey();
+        
+		
+		AES256Encryption aes = new AES256Encryption();
+        SecretKey skey = aes.generateAESPasswordKey(masterkey,strIv);
+			
+	        byte[] raw = skey.getEncoded();
+	        strKey = new String(Base64.encode(raw));
+			//encryptedPrivateKey = aes.encrypt(strKey,strIv, privateKey);
+	        encryptedPrivateKey = aes.encrypt(strKey, strIv, privateKey);
+			
+			//System.out.println("STRKey : " + strKey);
+
+		return encryptedPrivateKey;
 	}
 	
 	public String encryptPrivateKey(String privateKey,String Password) throws Exception{
@@ -147,6 +224,25 @@ public class UserController {
 
 		return encryptedPrivateKey;
 	}
+	
+	public String decryptPrivateKeyNew(String encryptedKey,String Password) throws Exception{
+		String decryptPrivateKey = "";
+        String strIv = "18A5Z/IsHs6g8/65sBxkCQ==";
+        String strKey = "";
+        GenerateMasterKey GMK = new GenerateMasterKey();
+        String masterkey = GMK.getMasterKey();
+		AES256Encryption aes = new AES256Encryption();
+        SecretKey skey;
+
+			skey = aes.generateAESPasswordKey(masterkey,strIv);
+	        byte[] raw = skey.getEncoded();
+	        strKey = new String(Base64.encode(raw));
+	        //System.out.println("STRKey : " +strKey);
+	        decryptPrivateKey = aes.decrypt(strKey,strIv, encryptedKey.trim());
+
+		return decryptPrivateKey;
+	}
+	
 	
 	public String decryptPrivateKey(String encryptedKey,String Password) throws Exception{
 		String decryptPrivateKey = "";
@@ -183,6 +279,31 @@ public class UserController {
 		     return new String(decrypted);
 		  } catch (Exception e) { return null; }
 		}
+		
+		public String getUserName(int userId) {
+			// TODO Auto-generated method stub
+			String username  = "" ;
+			ResultSet rs;
+			try {
+				Connection conn = new DbConn().getConnection();
+				String sql = "SELECT username FROM pc_adm_users WHERE user_id = ?";
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ps.setInt(1, userId);
+				rs = ps.executeQuery();
+				while(rs.next()){
+					username = rs.getString(1);
+				}
+				
+				ps.close();conn.close();
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return username;
+		}
+
 	
 	public static void main(String[] args) {
 		
@@ -191,22 +312,25 @@ public class UserController {
 		String decryptPrivateKey = null;
 		UserController uc = new UserController();
 		ArrayList keyPair = uc.generateKey("abc123");
-		String encryptedKey = keyPair.get(1).toString();
+		String encryptedKey = keyPair.get(3).toString();
+		GenerateMasterKey gmk = new GenerateMasterKey();
+		String masterKey = gmk.getMasterKey();
 		try {
-			decryptPrivateKey = uc.decryptPrivateKey(encryptedKey,"abc123");
+			decryptPrivateKey = uc.decryptPrivateKeyNew(encryptedKey,"abc123");
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		System.out.println("private key" + keyPair.get(0));
-		System.out.println("decrypted key" + decryptPrivateKey);
-		System.out.println(keyPair.get(1));
+		System.out.println("Private Key : " + keyPair.get(4));
+		System.out.println("Encrypted Private Key : "+ encryptedKey);
+		System.out.println("Decrypted Private key : " + decryptPrivateKey);
+		
 		
 
 		
-		if(keyPair.get(0).equals(decryptPrivateKey)){
+		if(keyPair.get(4).equals(decryptPrivateKey)){
 			System.out.println("same.....");
 		}else{
 			System.out.println("not same.....");
